@@ -1,0 +1,31 @@
+<h2>Quick Test</h2>
+<table>
+    <thead>
+        <tr><td>Name</td><td>Age</td></tr>
+    </thead>
+    <tbody>
+        <tr><td>Josh</td><td>34</td></tr>
+        <tr><td>Jared</td><td>39</td></tr>
+        <tr><td>Charity</td><td>34</td></tr>
+    </tbody>
+</table>
+
+<link href="./src/jquery.autofilter.css" rel="stylesheet" type="text/css">
+<link href="./src/jquery.modal.css" rel="stylesheet"  />
+<script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+<script src="./src/colResizable-1.6.js"></script>
+<script src="./src/jquery.modal.min.js"></script>
+<script src="./src/jquery.autofilter.js"></script>
+
+<script>
+$(document).ready( function() {
+    $('table').autofilter();
+
+  $("table").colResizable({
+    liveDrag:true,
+    gripInnerHtml:"<div class='grip'></div>", 
+    draggingClass:"dragging"
+    //onResize:onSampleResized
+  });   
+});
+</script>
