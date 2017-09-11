@@ -43,7 +43,7 @@
             headers.each(function(columnIndex) {
                 var header = $(this);
                 header.append("<div class='filter-icon-wrapper'><div class='filter-icon'></div></div>");
-                var filter = header.find(".filter-icon-wrapper");
+                var filter = header.find(".filter-icon");
 
                 // add to the create the data model
                 let filterable = {};
@@ -65,19 +65,30 @@
                     $("#filter-list").html("");
                     var columnFilters = allColumnFilters[columnIndex];
                     for (var filterIndex = 0; filterIndex < columnFilters.length; filterIndex++) {
-                        var filter = columnFilters[filterIndex];
-                        var checkId = "autofilter_check" + filterIndex;
-                        var checkedStr = filter["checked"] ? " checked" : "";
+                        let filter = columnFilters[filterIndex];
+                        let checkId = "autofilter_check" + filterIndex;
+                        let checkedStr = filter["checked"] ? " checked" : "";
                         $("#filter-list").append("<input id='" + checkId + "' type='checkbox'" + checkedStr + "><label>" + filter["label"] + "</label><br/>");
                     }
                     
                     filterWidget.modal();
                     filterWidget.one($.modal.BEFORE_CLOSE, function(event, modal) {
                         // save off check changes
+                        var includeAll = true;
                         for (var filterIndex = 0; filterIndex < columnFilters.length; filterIndex++) {
-                            var filter = columnFilters[filterIndex];
-                            var checkId = "autofilter_check" + filterIndex;
-                            columnFilters[filterIndex]["checked"] = $("#" + checkId).is(':checked');
+                            let filter = columnFilters[filterIndex];
+                            let checkId = "autofilter_check" + filterIndex;
+                            let isIncluding = $("#" + checkId).is(':checked');
+                            columnFilters[filterIndex]["checked"] = isIncluding;
+                            includeAll = includeAll && isIncluding;
+                        }
+
+                        // update filter icon's status
+                        if (includeAll) {
+                            console.log(filter);
+                            filter.removeClass("filtering");
+                        } else {
+                            filter.addClass("filtering");
                         }
 
                         // build the check set

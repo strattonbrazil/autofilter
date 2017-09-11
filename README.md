@@ -14,4 +14,3 @@ $('table').autofilter();
 
 # TODO
 * support dynamic tables
-* improve filter icon and styling

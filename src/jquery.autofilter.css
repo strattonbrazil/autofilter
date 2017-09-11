@@ -1,14 +1,30 @@
 .filter-icon-wrapper {
     position: relative;
     height: 100%;    
+    display: inline-block;
+    margin-left: 2px;
 }
+
 .filter-icon {
     width: 16px;
     height: 16px;
-    background-color: blue;
-    position: absolute;
-    bottom: 0;
-    right: 0;
+    
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QkLFSU4EcGOFQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAA1SURBVDjLY2AYBYxI7P/k6GVEE/xPqsWMWCT/k+BqrAbgM4SRoAAeQ7CqZaI0FoaBAcMAAABqAgUOqMupJAAAAABJRU5ErkJggg==');
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.1);
+
+    cursor: pointer;
+}
+
+.filter-icon.filtering {
+    background-color: rgba(0,255,0,0.4);
+    background-blend-mode: multiply;
+}
+
+.filter-icon:hover {
+    background-color: rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,1);
+    background-blend-mode: multiply;
 }
 
 .filter-button-reset {
