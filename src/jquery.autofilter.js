@@ -20,9 +20,6 @@
             filterWidget = $("#" + filterWidgetId);
         }
 
-        //<form id="login-form" class="widget">
-        //...
-        //</form>
         this.each(function() {
             // TODO: check if is a table
 
@@ -36,41 +33,37 @@
                 });
                 rows.push(rowValues);
             });
-            //console.log(rows);
 
             // add filter element to all top tds
-            var header = $(this).find("thead");
+            var headerRow = $(this).find("thead");
             
-            //console.log(header);
-            var headers = header.find("td");
+            var allColumnFilters = [];
+
+            var headers = headerRow.find("td");
             headers.each(function(columnIndex) {
-                $(this).append("<div class='filter-icon-wrapper'><div class='filter-icon'></div></div>");
-                var filter = $(this).find(".filter-icon-wrapper");
-                filter.click(function() {
-                    var columnFilters = $(this).attr("data-filters");
-                    if (columnFilters == undefined) {
-                        console.log("creating filters");
-                        // get all the filterable values
-                        var filterable = {};
-                        var filterableList = [];
+                var header = $(this);
+                header.append("<div class='filter-icon-wrapper'><div class='filter-icon'></div></div>");
+                var filter = header.find(".filter-icon-wrapper");
 
-                        for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-                            var data = rows[rowIndex][columnIndex];
-                            if (!(data in filterable)) {
-                                filterable[data] = true;
-                                filterableList.push({
-                                    "label" : data,
-                                    "checked" : true
-                                });
-                            }
-                        }
-                        columnFilters = filterableList;
-                        $(this).attr("data-filters", JSON.stringify(columnFilters));
-                    } else {
-                        columnFilters = JSON.parse(columnFilters);
+                // add to the create the data model
+                let filterable = {};
+                let filterableList = [];
+                for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                    let data = rows[rowIndex][columnIndex];
+                    if (!(data in filterable)) {
+                        filterable[data] = true;
+                        filterableList.push({
+                            "label" : data,
+                            "checked" : true
+                        });
                     }
+                }
+                allColumnFilters.push(filterableList);
 
+                filter.click(function() {
+                    // empty the list and put in the filters for this column
                     $("#filter-list").html("");
+                    var columnFilters = allColumnFilters[columnIndex];
                     for (var filterIndex = 0; filterIndex < columnFilters.length; filterIndex++) {
                         var filter = columnFilters[filterIndex];
                         var checkId = "autofilter_check" + filterIndex;
@@ -80,18 +73,35 @@
                     
                     filterWidget.modal();
                     filterWidget.one($.modal.BEFORE_CLOSE, function(event, modal) {
-                        console.log("closed");
-
                         // save off check changes
                         for (var filterIndex = 0; filterIndex < columnFilters.length; filterIndex++) {
                             var filter = columnFilters[filterIndex];
                             var checkId = "autofilter_check" + filterIndex;
                             columnFilters[filterIndex]["checked"] = $("#" + checkId).is(':checked');
                         }
-                        console.log(columnFilters);
-                        $(this).attr("data-filters", JSON.stringify(columnFilters));
+
+                        // build the check set
+                        var allColumnFilterSets = allColumnFilters.map(function(columnFilters) {
+                            return new Set(columnFilters.filter(function(filter) {
+                                return filter["checked"];
+                            }).map(function(filter){ 
+                                return filter["label"];
+                            }));
+                        });
 
                         // update the table visibility
+                        body.find("tr").each(function(rowIndex) {
+                            var rowVisible = true;
+                            $(this).find("td").each(function(cellColumnIndex) {
+                                var cellValue = $(this).text();
+                                rowVisible = rowVisible && allColumnFilterSets[cellColumnIndex].has(cellValue);
+                            });
+                            if (rowVisible) {
+                                $(this).show();
+                            } else {
+                                $(this).hide();
+                            }
+                        });
                     });
                 });
             });
