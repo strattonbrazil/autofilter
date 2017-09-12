@@ -13,4 +13,6 @@ $('table').autofilter();
 ```
 
 # TODO
-* support dynamic tables
+* support automatic updates to dynamic tables (no need for reset)
+* support filter list
+* support buttons

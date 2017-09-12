@@ -1,14 +1,22 @@
-<h2>Quick Test</h2>
-<table>
-    <thead>
-        <tr><td>Name</td><td>Age</td></tr>
-    </thead>
-    <tbody>
-        <tr><td>Josh</td><td>34</td></tr>
-        <tr><td>Jared</td><td>39</td></tr>
-        <tr><td>Charity</td><td>34</td></tr>
-    </tbody>
-</table>
+<body>
+    <h2>Quick Test</h2>
+    <table>
+        <thead>
+            <tr><td>Name</td><td>Age</td></tr>
+        </thead>
+        <tbody>
+            <tr><td>Josh</td><td>34</td></tr>
+            <tr><td>Jared</td><td>39</td></tr>
+            <tr><td>Charity</td><td>34</td></tr>
+        </tbody>
+    </table>
+    <fieldset>
+        <legend>Add Row</legend>
+        <input id="name-entry" placeholder="(enter name)" />
+        <input id="age-entry" placeholder="(enter age" />
+        <button id="entry-button">add entry</button>
+    </fieldset>
+<body>
 
 <link href="./src/jquery.autofilter.css" rel="stylesheet" type="text/css">
 <link href="./src/jquery.modal.css" rel="stylesheet"  />
@@ -27,5 +35,12 @@ $(document).ready( function() {
     draggingClass:"dragging"
     //onResize:onSampleResized
   });   
+
+  $("#entry-button").click(function() {
+      let name = $("#name-entry").val();
+      let age = $("#age-entry").val();
+      
+      $('table tr:last').after("<tr><td>" + name + "</td><td>" + age + "</td></tr>");
+  });
 });
 </script>
