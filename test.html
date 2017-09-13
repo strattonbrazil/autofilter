@@ -41,6 +41,7 @@ $(document).ready( function() {
       let age = $("#age-entry").val();
       
       $('table tr:last').after("<tr><td>" + name + "</td><td>" + age + "</td></tr>");
+      $("table").autofilter();
   });
 });
 </script>

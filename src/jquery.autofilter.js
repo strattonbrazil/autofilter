@@ -1,49 +1,79 @@
 "use strict";
 
 (function($) {
+    // given an HTML table object, return the values in the table
+    // as a row-major 2D array
+    function getTableData(table) {
+        var body = $(table).find("tbody");
+        var rows = [];
+        body.find("tr").each(function(index) {
+            var rowValues = [];
+            $(this).find("td").each(function(index) {
+                rowValues.push($(this).text());
+            });
+            rows.push(rowValues);
+        });
+        return rows;
+    }
+
+    // given an HTML table object and an array of filters (a Set of keys),
+    // toggle the visibility of the individual rows if a given row
+    // has a cell that isn't approved by the filter for its
+    // respective column
+    function updateRowVisibility(table, filters) {
+        let tableBody = $(table).find("tbody");
+        tableBody.find("tr").each(function(rowIndex) {
+            let rowVisible = true;
+            $(this).find("td").each(function(cellColumnIndex) {
+                let cellValue = $(this).text();
+                rowVisible = rowVisible && filters[cellColumnIndex].has(cellValue);
+            });
+            if (rowVisible) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
     $.fn.autofilter = function() {
         // setup the filter modal dialog
-        var filterWidgetId = "_jquery_autofilter_modal";
-        var filterWidget = $("#" + filterWidgetId);
-        if (filterWidget.length == 0) { // not created yet
-            var filterWidgetCode = "" +
+        var modalWidgetId = "_jquery_autofilter_modal";
+        var modalWidget = $("#" + modalWidgetId);
+        if (modalWidget.length == 0) { // not created yet
+            var modalWidgetCode = "" +
 "<div style='display: none'>" +
-    "<div id='" + filterWidgetId + "' class='modal'>" +
+    "<div id='" + modalWidgetId + "' class='modal'>" +
     "    <span class='filter-button-reset'>Select all</span> - <span class='filter-button-reset'>Clear</span>" +
     "    <input class='filter-input'></input>" +
     "    <div id='filter-list'>" +
     "    </div>" +
     "</div>" +
 "</div>";
-            $("body").append(filterWidgetCode);
+            $("body").append(modalWidgetCode);
 
-            filterWidget = $("#" + filterWidgetId);
+            modalWidget = $("#" + modalWidgetId);
         }
 
         this.each(function() {
             // TODO: check if is a table
+            const table = this;
+            let tableBody = $(this).find("tbody");
 
             // get table data
-            var body = $(this).find("tbody");
-            var rows = [];
-            body.find("tr").each(function(index) {
-                var rowValues = [];
-                $(this).find("td").each(function(index) {
-                    rowValues.push($(this).text());
-                });
-                rows.push(rowValues);
-            });
+            let rows = getTableData(this);
 
             // add filter element to all top tds
-            var headerRow = $(this).find("thead");
+            let headerRow = $(this).find("thead");
             
+            // attach column filters to table
             var allColumnFilters = [];
 
             var headers = headerRow.find("td");
             headers.each(function(columnIndex) {
                 var header = $(this);
                 header.append("<div class='filter-icon-wrapper'><div class='filter-icon'></div></div>");
-                var filter = header.find(".filter-icon");
+                var filterIcon = header.find(".filter-icon");
 
                 // add to the create the data model
                 let filterable = {};
@@ -60,7 +90,7 @@
                 }
                 allColumnFilters.push(filterableList);
 
-                filter.click(function() {
+                filterIcon.click(function() {
                     // empty the list and put in the filters for this column
                     $("#filter-list").html("");
                     var columnFilters = allColumnFilters[columnIndex];
@@ -71,8 +101,8 @@
                         $("#filter-list").append("<input id='" + checkId + "' type='checkbox'" + checkedStr + "><label>" + filter["label"] + "</label><br/>");
                     }
                     
-                    filterWidget.modal();
-                    filterWidget.one($.modal.BEFORE_CLOSE, function(event, modal) {
+                    modalWidget.modal();
+                    modalWidget.one($.modal.BEFORE_CLOSE, function(event, modal) {
                         // save off check changes
                         var includeAll = true;
                         for (var filterIndex = 0; filterIndex < columnFilters.length; filterIndex++) {
@@ -85,10 +115,9 @@
 
                         // update filter icon's status
                         if (includeAll) {
-                            console.log(filter);
-                            filter.removeClass("filtering");
+                            filterIcon.removeClass("filtering");
                         } else {
-                            filter.addClass("filtering");
+                            filterIcon.addClass("filtering");
                         }
 
                         // build the check set
@@ -100,19 +129,7 @@
                             }));
                         });
 
-                        // update the table visibility
-                        body.find("tr").each(function(rowIndex) {
-                            var rowVisible = true;
-                            $(this).find("td").each(function(cellColumnIndex) {
-                                var cellValue = $(this).text();
-                                rowVisible = rowVisible && allColumnFilterSets[cellColumnIndex].has(cellValue);
-                            });
-                            if (rowVisible) {
-                                $(this).show();
-                            } else {
-                                $(this).hide();
-                            }
-                        });
+                        updateRowVisibility(table, allColumnFilterSets);
                     });
                 });
             });
