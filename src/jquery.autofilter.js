@@ -63,15 +63,24 @@
         table._allColumnFilters = allColumnFilters;
     }
 
+    //Creating custom case insensitive expression for contains
+    jQuery.expr[':'].icontains = function(a, i, m) {
+        //m[3] is the matching text we are looking for
+        return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
+    };
+
     $.fn.autofilter = function() {
         // setup the filter modal dialog
-        var modalWidgetId = "_jquery_autofilter_modal";
-        var modalWidget = $("#" + modalWidgetId);
+        const modalWidgetId = "_jquery_autofilter_modal";
+        var modalWidget = $("#" + modalWidgetId),
+            $this = $(this),
+            $inputText;
+
         if (modalWidget.length == 0) { // not created yet
             var modalWidgetCode = "" +
 "<div style='display: none'>" +
     "<div id='" + modalWidgetId + "' class='modal'>" +
-    "    <span class='filter-button-reset'>Select all</span> - <span class='filter-button-reset'>Clear</span>" +
+    "    <span id='_jquery_modal_select_all' class='filter-button-reset'>Select all</span> - <span id='_jquery_modal_clear' class='filter-button-reset'>Clear</span>" +
     "    <input class='filter-input'></input>" +
     "    <div id='filter-list'>" +
     "    </div>" +
@@ -80,6 +89,27 @@
             $("body").append(modalWidgetCode);
 
             modalWidget = $("#" + modalWidgetId);
+            $inputText = $('input.filter-input');
+
+            $('#_jquery_modal_select_all').on('click', function() {
+                $('#filter-list input').each(function() {
+                    $(this).attr('checked', 'checked')
+                });
+            });
+            $('#_jquery_modal_clear').on('click', function() {
+                $('#filter-list input').each(function() {
+                    $(this).removeAttr('checked');
+                });
+            });
+            $inputText.on('keyup', function() {
+                var value = $inputText.val()
+                if (value !== '') {
+                    $('#filter-list > div').hide()
+                    $('#filter-list > div:icontains(' + value + ')').show()
+                } else {
+                    $('#filter-list > div').show()
+                }
+            });
         }
 
         this.each(function() {
@@ -100,6 +130,7 @@
             headers.each(function(columnIndex) {
                 const header = $(this);
                 if (header.find(".filter-icon-wrapper").length > 0) { // autofilter() called again, reset with new data
+                    header.find('.filter-icon').removeClass('filtering');
                     tableBody.find("tr").show(); // show all rows
                 } else { // no icon yet, create it
                     header.append("<div class='filter-icon-wrapper'><div class='filter-icon'></div></div>");
@@ -115,7 +146,7 @@
                             let filter = columnFilters[filterIndex];
                             let checkId = "autofilter_check" + filterIndex;
                             let checkedStr = filter["checked"] ? " checked" : "";
-                            $("#filter-list").append("<input id='" + checkId + "' type='checkbox'" + checkedStr + "><label>" + filter["label"] + "</label><br/>");
+                            $("#filter-list").append("<div><input id='" + checkId + "' type='checkbox'" + checkedStr + "><label>" + filter["label"] + "</label></div>");
                         }
                         
                         modalWidget.modal();
@@ -147,6 +178,8 @@
                             });
 
                             updateRowVisibility(table, allColumnFilterSets);
+                            $inputText.val('');
+                            $this.trigger('autofilter.FILTERING_END');
                         });
                     });
                 }
