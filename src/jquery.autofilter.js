@@ -65,13 +65,14 @@
 
     //Creating custom case insensitive expression for contains
     jQuery.expr[':'].icontains = function(a, i, m) {
+        //m[3] is the matching text we are looking for
         return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
     };
 
     $.fn.autofilter = function() {
         // setup the filter modal dialog
-        var modalWidgetId = "_jquery_autofilter_modal",
-            modalWidget = $("#" + modalWidgetId),
+        const modalWidgetId = "_jquery_autofilter_modal";
+        var modalWidget = $("#" + modalWidgetId),
             $this = $(this),
             $inputText;
 
@@ -79,7 +80,7 @@
             var modalWidgetCode = "" +
 "<div style='display: none'>" +
     "<div id='" + modalWidgetId + "' class='modal'>" +
-    "    <span class='all filter-button-reset'>Select all</span> - <span class='clear filter-button-reset'>Clear</span>" +
+    "    <span id='_jquery_modal_select_all' class='filter-button-reset'>Select all</span> - <span id='_jquery_modal_clear' class='filter-button-reset'>Clear</span>" +
     "    <input class='filter-input'></input>" +
     "    <div id='filter-list'>" +
     "    </div>" +
@@ -88,14 +89,14 @@
             $("body").append(modalWidgetCode);
 
             modalWidget = $("#" + modalWidgetId);
-            $inputText = $('input.filter-input')
+            $inputText = $('input.filter-input');
 
-            $('.all.filter-button-reset').on('click', function() {
+            $('#_jquery_modal_select_all').on('click', function() {
                 $('#filter-list input').each(function() {
                     $(this).attr('checked', 'checked')
                 });
             });
-            $('.clear.filter-button-reset').on('click', function() {
+            $('#_jquery_modal_clear').on('click', function() {
                 $('#filter-list input').each(function() {
                     $(this).removeAttr('checked');
                 });
