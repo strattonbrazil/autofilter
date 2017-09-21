@@ -39,7 +39,7 @@
     // given an HTML table object, attach a "column filters" view model to it, which
     // is an array of arrays--each subelement being a possible filter
     function resetColumnFilters(table) {
-        const numColumns = $(table).find("thead").find("td").length;
+        const numColumns = $(table).find("thead").find("th").length;
         const rows = getTableData(table);
         const allColumnFilters = [];
         for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
@@ -63,19 +63,50 @@
         table._allColumnFilters = allColumnFilters;
     }
 
+    // validates that the HTML element is a valid table with the correct format.
+    function isValidElement(table) {
+        var isValid = true,
+            $table = $(table);
+
+        if (table.tagName !== 'TABLE') {
+            console.error('Element is not a table.');
+            isValid = false;
+        } else if (table.firstElementChild.tagName !== 'THEAD') {
+            console.error('Table has not a valid format, THEAD element expected.');
+            isValid = false;
+        } else if ($table.find('thead > tr').length === 0) {
+            console.error('Table has not a valid format, THEAD -> TR elements expected.');
+            isValid = false;
+        } else if ($table.find('thead > tr > th').length === 0) {
+            console.error('Table has not a valid format, THEAD -> TR -> TH elements expected.');
+            isValid = false;
+        } else if ($table.find('tbody').length === 0) {
+            console.error('Table has not a valid format, TBODY element expected.');
+            isValid = false;
+        } else if ($table.find('tbody > tr').length === 0) {
+            console.error('Table has not a valid format, TBODY -> TR elements expected.');
+            isValid = false;
+        }
+        return isValid
+    }
+
     //Creating custom case insensitive expression for contains
     jQuery.expr[':'].icontains = function(a, i, m) {
         //m[3] is the matching text we are looking for
         return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
     };
 
-    $.fn.autofilter = function() {
+    $.fn.autofilter = function(params) {
         // setup the filter modal dialog
         const modalWidgetId = "_jquery_autofilter_modal";
         var modalWidget = $("#" + modalWidgetId),
             $this = $(this),
             $inputText;
 
+        if ($this.length === 0) {
+            console.error('Selector not found.');
+            return;
+        }
         if (modalWidget.length == 0) { // not created yet
             var modalWidgetCode = "" +
 "<div style='display: none'>" +
@@ -115,6 +146,10 @@
         this.each(function() {
             // TODO: check if is a table
             const table = this;
+
+            if ( !isValidElement(table) ) {
+                return;
+            }
             let tableBody = $(this).find("tbody");
 
             // add filter element to all top tds
@@ -126,8 +161,13 @@
             resetColumnFilters(table);
 
             // add filter icons to each header
-            var headers = headerRow.find("td");
+            var headers = headerRow.find("th");
             headers.each(function(columnIndex) {
+                //checking if there are items to blacklist.
+                if (typeof params !== 'undefined' && typeof params.blacklist !== 'undefined' && params.blacklist.length > 0 && params.blacklist.indexOf(columnIndex) !== -1) {
+                    return true;
+                }
+
                 const header = $(this);
                 if (header.find(".filter-icon-wrapper").length > 0) { // autofilter() called again, reset with new data
                     header.find('.filter-icon').removeClass('filtering');
