@@ -7,7 +7,7 @@
 * jquery-modal (https://github.com/kylefox/jquery-modal)
 
 # Integration
-To use autofilter, call *autofilter()* on the jquery-wrapped table.  
+To use autofilter, included the required dependencies as well as the *autofilter.js* file.  Then call *autofilter()* on the jquery-wrapped table.  
 ```javascript
 $('table').autofilter();
 ```
