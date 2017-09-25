@@ -2,6 +2,10 @@
 
 *autofilter* is a simple jquery plugin for filtering tables per column.  When applied to a well-formatted table element, it will allow multi-column filtering.  
 
+![unfiltered table](/docs/images/unfiltered.jpg?raw=true "Optional Title")
+![filter modal](/docs/images/filter_modal.jpg?raw=true "Optional Title")
+![filtered table](/docs/images/filtered.jpg?raw=true "Optional Title")
+
 # Dependencies
 * jquery
 * jquery-modal (https://github.com/kylefox/jquery-modal)
